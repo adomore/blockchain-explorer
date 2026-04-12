@@ -1,0 +1,62 @@
+[package]
+name = "blockchain_explorer"
+version = "0.3.0"
+edition = "2021"
+authors = ["Blockchain Explorer Team"]
+description = "A command-line tool for retrieving blockchain data (ETH, BTC) - Updated for Etherscan API V2"
+license = "MIT"
+repository = "https://github.com/adomore/blockchain-explorer"
+
+[dependencies]
+# CLI argument parsing (use older version compatible with Rust 1.63)
+clap = { version = "4.0", features = ["derive", "env"] }
+
+# Async runtime - use minimal features to reduce size
+tokio = { version = "1.25", default-features = false, features = ["rt", "rt-multi-thread", "macros", "sync"] }
+
+# HTTP client - minimal TLS
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# CSV export
+csv = "1.2"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Async traits
+async-trait = "0.1"
+
+# Logging - minimal features
+tracing = { version = "0.1", default-features = false, features = ["log"] }
+# tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["fmt", "env-filter", "ansi"] }
+
+# URL handling
+url = "2.4"
+
+[dev-dependencies]
+mockito = "0.31"
+tokio-test = "0.4"
+
+[[bin]]
+name = "blockchain-explorer"
+path = "src/main.rs"
+
+[lib]
+name = "blockchain_explorer"
+path = "src/lib.rs"
+
+[profile.release]
+# Optimize for size instead of speed
+opt-level = "z"
+# Enable LTO for better optimization
+lto = true
+# Single codegen unit for better optimization
+codegen-units = 1
+# Strip symbols to reduce size
+strip = true
