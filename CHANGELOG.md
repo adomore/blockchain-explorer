@@ -27,11 +27,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--no-checksum`, `--all-occurrences`, `--blockchain` and `--query` options
   for the `match` command
 - Report entries record the line, column and occurrence count of each address
+- GitHub Actions CI: tests on Linux, macOS and Windows, plus `cargo fmt`,
+  `cargo clippy -D warnings` and a job pinned to the declared MSRV
+- `rust-version = "1.85"` in `Cargo.toml`, matching the highest requirement
+  among the locked dependencies
+- Unit tests for `blockchain::utils` and `models`, which had none
+
+### Changed
+- ETH and BTC balances now render identically: integer division, trailing
+  zeros trimmed. 1 BTC prints as `1`, not `1.00000000`
+- `--no-color` now actually disables ANSI colour in the log output
+
+### Removed
+- `--continue-on-error` and `--show-progress` on the `batch` command. Neither
+  was ever read: batch queries always continue past failures and there is no
+  progress reporting to switch off
 
 ### Fixed
 - Missing public re-exports (`BlockchainType`, `Transaction`, `CsvRecord`) that
   prevented the integration test suite from compiling
 - Tests wrote to a hardcoded `/tmp` path and failed on Windows
+- `wei_to_eth` converted through `f64`, silently rounding balances above
+  2^53 wei. Conversion now stays in `u128`
 
 ## [0.3.0] - 2024-XX-XX
 

@@ -4,11 +4,14 @@ version = "0.3.0"
 edition = "2021"
 authors = ["Blockchain Explorer Team"]
 description = "A command-line tool for retrieving blockchain data (ETH, BTC) - Updated for Etherscan API V2"
+# Highest rust-version among the dependencies in Cargo.lock (set by clap 4.6).
+# CI pins a job to this exact toolchain so the claim stays true.
+rust-version = "1.85"
 license = "MIT"
 repository = "https://github.com/adomore/blockchain-explorer"
 
 [dependencies]
-# CLI argument parsing (use older version compatible with Rust 1.63)
+# CLI argument parsing
 clap = { version = "4.0", features = ["derive", "env"] }
 
 # Async runtime - use minimal features to reduce size

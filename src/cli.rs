@@ -71,14 +71,6 @@ pub struct BatchArgs {
     /// Specify blockchain type for all addresses
     #[arg(short, long, value_enum)]
     pub blockchain: Option<BlockchainArg>,
-
-    /// Continue on errors (don't stop on first failure)
-    #[arg(long, default_value_t = true)]
-    pub continue_on_error: bool,
-
-    /// Show progress bar
-    #[arg(short, long, default_value_t = true)]
-    pub show_progress: bool,
 }
 
 /// Match BTC/ETH addresses inside a text file

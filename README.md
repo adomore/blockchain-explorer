@@ -1,10 +1,8 @@
 # Blockchain Explorer
 
-[![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org)
+[![CI](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml/badge.svg)](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml)
+[![Rust](https://img.shields.io/badge/Rust-1.85+-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/blockchain-explorer/ci.yml?branch=main)](https://github.com/YOUR_USERNAME/blockchain-explorer/actions)
-[![Crates.io](https://img.shields.io/crates/v/blockchain_explorer.svg)](https://crates.io/crates/blockchain_explorer)
-[![docs.rs](https://img.shields.io/docsrs/blockchain_explorer)](https://docs.rs/blockchain_explorer)
 
 > 一个用 Rust 编写的命令行工具，用于查询区块链（ETH、BTC）地址数据。
 
@@ -20,7 +18,7 @@
 
 ### 前置要求
 
-- **Rust 工具链** (stable) - 支持 Windows 11, macOS, Linux
+- **Rust 工具链** 1.85 或更高（stable）- 支持 Windows 11, macOS, Linux
 - **Git** - 用于克隆代码仓库
 
 ### 从源码编译
@@ -168,6 +166,16 @@ blockchain-explorer query <ADDRESS> --etherscan-api-key YOUR_API_KEY
 
 ## 使用方法
 
+### 全局选项
+
+以下选项对所有子命令都有效：
+
+| 选项 | 说明 | 默认值 |
+|------|------|--------|
+| `-v, --verbose` | 输出 DEBUG 级别日志（API 请求 URL 中的 Key 会被脱敏） | 关闭 |
+| `--no-color` | 关闭日志输出的 ANSI 颜色，便于重定向到文件 | 关闭 |
+| `--etherscan-api-key <KEY>` | Etherscan API Key，等价于 `ETHERSCAN_API_KEY` 环境变量 | 无 |
+
 ### 查询单个地址
 
 ```bash
@@ -186,9 +194,17 @@ blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 --include-t
 # 输出为 JSON 格式
 blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 --format json
 
-# 导出到文件
+# 输出为 CSV 单行（便于管道处理）
+blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 --format csv
+
+# 导出到文件（默认 JSON）
 blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 -o result.json
+
+# 导出到文件并指定格式（json / csv）
+blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21     -o result.csv --export-format csv
 ```
+
+`--format` 控制打印到终端的内容，`--export-format` 控制写入 `-o` 文件的内容，两者相互独立。
 
 ### 批量查询
 
@@ -312,7 +328,7 @@ Address Information
 ================================================================================
 Address:             0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21
 Blockchain:          Ethereum
-Balance:             1.50000000
+Balance:             1.5
 Total Transactions:  10
 
 --------------------------------------------------------------------------------
@@ -322,7 +338,7 @@ Transaction #1
   Hash:        0xabc123...
   From:        0xfrom...
   To:          0xto...
-  Value:       0.50000000
+  Value:       0.5
   Timestamp:   1234567890
   Status:      Success
 ================================================================================
@@ -335,12 +351,27 @@ Address,Blockchain,Balance,Total_Transactions,First_Tx_Hash,...
 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21,Ethereum,1.5,10,0xabc123,...
 ```
 
+### 余额格式
+
+ETH 与 BTC 的余额使用同一套规则渲染：按整数除法换算（ETH 为 10^18 wei，
+BTC 为 10^8 satoshi），去掉小数末尾多余的零。1 ETH 显示为 `1`，0.5 BTC
+显示为 `0.5`，1 satoshi 显示为 `0.00000001`。换算全程使用 `u128`，不经过
+浮点数，因此大额余额不会丢失精度。
+
+> `Balance_USD` 列目前恒为 `N/A`——本工具没有接入任何汇率数据源。
+
 ## 项目结构
 
 ```
 blockchain-explorer/
-├── Cargo.toml
+├── Cargo.toml            # 包定义（含 rust-version = 1.85）
 ├── README.md
+├── CHANGELOG.md          # 版本变更记录
+├── CONTRIBUTING.md       # 贡献指南
+├── LICENSE               # MIT
+├── .github/
+│   └── workflows/
+│       └── ci.yml        # 三平台测试 + fmt/clippy + MSRV 校验
 ├── src/
 │   ├── main.rs          # CLI 入口
 │   ├── lib.rs           # 库文件
@@ -368,7 +399,14 @@ cargo test test_bitcoin
 
 # 运行带日志的测试
 RUST_LOG=debug cargo test
+
+# CI 上执行的完整检查
+cargo fmt --all --check
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --locked
 ```
+
+测试全部使用 Mock 提供者，不访问网络，因此离线也能运行。
 
 ## 技术栈
 

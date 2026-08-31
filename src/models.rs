@@ -165,3 +165,132 @@ impl Default for BatchResult {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_address_detects_ethereum() {
+        assert_eq!(
+            BlockchainType::from_address("0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21"),
+            Some(BlockchainType::Ethereum)
+        );
+
+        // Surrounding whitespace is trimmed
+        assert_eq!(
+            BlockchainType::from_address("  0x0000000000000000000000000000000000000000  "),
+            Some(BlockchainType::Ethereum)
+        );
+    }
+
+    #[test]
+    fn test_from_address_detects_bitcoin() {
+        // P2PKH, P2SH, Bech32
+        assert_eq!(
+            BlockchainType::from_address("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"),
+            Some(BlockchainType::Bitcoin)
+        );
+        assert_eq!(
+            BlockchainType::from_address("3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy"),
+            Some(BlockchainType::Bitcoin)
+        );
+        assert_eq!(
+            BlockchainType::from_address("bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"),
+            Some(BlockchainType::Bitcoin)
+        );
+    }
+
+    #[test]
+    fn test_from_address_rejects_non_addresses() {
+        assert_eq!(BlockchainType::from_address(""), None);
+        assert_eq!(BlockchainType::from_address("invalid"), None);
+
+        // Right prefix and length, but not hex
+        assert_eq!(
+            BlockchainType::from_address("0xZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"),
+            None
+        );
+
+        // An Ethereum transaction hash is 0x + 64 hex, not an address
+        assert_eq!(
+            BlockchainType::from_address(&format!("0x{}", "a".repeat(64))),
+            None
+        );
+
+        // Too short for any Bitcoin format
+        assert_eq!(BlockchainType::from_address("1abc"), None);
+    }
+
+    #[test]
+    fn test_address_info_starts_empty() {
+        let info = AddressInfo::new("0xabc".to_string(), BlockchainType::Ethereum);
+
+        assert_eq!(info.blockchain, "Ethereum");
+        assert_eq!(info.balance, "0");
+        assert_eq!(info.total_transactions, 0);
+        assert!(info.balance_usd.is_none());
+        assert!(info.transactions.is_empty());
+    }
+
+    #[test]
+    fn test_csv_record_takes_first_and_last_transaction() {
+        let mut info = AddressInfo::new("0xabc".to_string(), BlockchainType::Ethereum);
+        info.transactions = vec![
+            Transaction {
+                hash: "first".to_string(),
+                from: "a".to_string(),
+                to: "b".to_string(),
+                value: "1".to_string(),
+                timestamp: Some(100),
+                block_number: Some(1),
+                gas_used: None,
+                gas_price: None,
+                status: "Success".to_string(),
+            },
+            Transaction {
+                hash: "last".to_string(),
+                from: "c".to_string(),
+                to: "d".to_string(),
+                value: "2".to_string(),
+                timestamp: None,
+                block_number: Some(2),
+                gas_used: None,
+                gas_price: None,
+                status: "Success".to_string(),
+            },
+        ];
+
+        let record = CsvRecord::from(&info);
+        assert_eq!(record.first_tx_hash.as_deref(), Some("first"));
+        assert_eq!(record.last_tx_hash.as_deref(), Some("last"));
+        assert_eq!(record.first_tx_timestamp.as_deref(), Some("100"));
+
+        // A missing timestamp stays missing rather than becoming "0"
+        assert_eq!(record.last_tx_timestamp, None);
+    }
+
+    #[test]
+    fn test_csv_record_from_address_without_transactions() {
+        let info = AddressInfo::new("0xabc".to_string(), BlockchainType::Ethereum);
+        let record = CsvRecord::from(&info);
+
+        assert_eq!(record.first_tx_hash, None);
+        assert_eq!(record.last_tx_hash, None);
+    }
+
+    #[test]
+    fn test_batch_result_counts_both_outcomes() {
+        let mut result = BatchResult::new();
+        result.add_result(Ok(AddressInfo::new(
+            "0xabc".to_string(),
+            BlockchainType::Ethereum,
+        )));
+        result.add_result(Err("boom".to_string()));
+
+        assert_eq!(result.total, 2);
+        assert_eq!(result.successful, 1);
+        assert_eq!(result.failed, 1);
+        assert_eq!(result.results.len(), 2);
+    }
+}

@@ -17,7 +17,7 @@ Thank you for your interest in contributing!
 
 ### Reporting Bugs
 
-1. Check existing [issues](https://github.com/YOUR_USERNAME/blockchain-explorer/issues) first
+1. Check existing [issues](https://github.com/adomore/blockchain-explorer/issues) first
 2. Create a new issue with:
    - Clear title and description
    - Steps to reproduce
@@ -51,7 +51,7 @@ Thank you for your interest in contributing!
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/blockchain-explorer.git
+git clone https://github.com/adomore/blockchain-explorer.git
 cd blockchain-explorer
 
 # Install dependencies

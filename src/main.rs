@@ -345,6 +345,7 @@ async fn main() {
     FmtSubscriber::builder()
         .with_max_level(log_level)
         .with_target(false)
+        .with_ansi(!cli.no_color)
         .init();
 
     // Execute command
