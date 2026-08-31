@@ -9,75 +9,82 @@ AIGC:
     ReservedCode2: 30440220191a32a0668d3667aa0440b12ebdee8829670c3b01586c70c45d491909ea2fa102203459121942c2ecbe98d23ab339e67156373bd1a9a57a223bf0959fbded39c653
 ---
 
-# Changelog
+# 变更日志
 
-All notable changes to this project will be documented in this file.
+**简体中文** | [English](CHANGELOG.en.md)
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+本文件记录本项目所有值得留意的变更。
 
-## [Unreleased]
+格式参考 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)，
+版本号遵循 [语义化版本](https://semver.org/spec/v2.0.0.html)。
 
-### Added
-- `match` command: scan any text file for BTC/ETH addresses and write the
-  result to a file (table, CSV or JSON, inferred from the output extension)
-- Bitcoin checksum verification: Base58Check for `1.../3...` and
-  Bech32/Bech32m (BIP-173 / BIP-350) for `bc1...`, with address type detection
-  (P2PKH, P2SH, P2WPKH, P2WSH, P2TR)
-- `--no-checksum`, `--all-occurrences`, `--blockchain` and `--query` options
-  for the `match` command
-- Report entries record the line, column and occurrence count of each address
-- GitHub Actions CI: tests on Linux, macOS and Windows, plus `cargo fmt`,
-  `cargo clippy -D warnings` and a job pinned to the declared MSRV
-- `rust-version = "1.85"` in `Cargo.toml`, matching the highest requirement
-  among the locked dependencies
-- Unit tests for `blockchain::utils` and `models`, which had none
+0.3.0 的日期取自本仓库的初始提交——该提交的 `Cargo.toml` 已经声明为 0.3.0。
+0.1.0 与 0.2.0 早于这里的任何记录：仓库既没有 tag 也没有更早的提交，因此宁可
+不标日期，也不填一个编造出来的日期。
 
-### Changed
-- ETH and BTC balances now render identically: integer division, trailing
-  zeros trimmed. 1 BTC prints as `1`, not `1.00000000`
-- `--no-color` now actually disables ANSI colour in the log output
+## [未发布]
 
-### Removed
-- `--continue-on-error` and `--show-progress` on the `batch` command. Neither
-  was ever read: batch queries always continue past failures and there is no
-  progress reporting to switch off
+### 新增
+- `match` 子命令：扫描任意文本文件中的 BTC/ETH 地址并将结果写入文件
+  （表格、CSV 或 JSON，按输出文件扩展名推断）
+- 比特币校验和验证：`1.../3...` 使用 Base58Check，`bc1...` 使用
+  Bech32/Bech32m（BIP-173 / BIP-350），并识别地址类型
+  （P2PKH、P2SH、P2WPKH、P2WSH、P2TR）
+- `match` 子命令的 `--no-checksum`、`--all-occurrences`、`--blockchain`
+  与 `--query` 选项
+- 报告条目记录每个地址的行号、列号与出现次数
+- GitHub Actions CI：在 Linux、macOS 与 Windows 上运行测试，另有 `cargo fmt`、
+  `cargo clippy -D warnings` 以及一个固定在所声明 MSRV 上的任务
+- `Cargo.toml` 中的 `rust-version = "1.85"`，与锁定依赖中的最高要求一致
+- `blockchain::utils` 与 `models` 的单元测试，此前两者都没有测试
+- 每份文档现在都有中文原本与英文镜像，由 CI 中的
+  `scripts/check_lockstep.py` 校验
 
-### Fixed
-- Missing public re-exports (`BlockchainType`, `Transaction`, `CsvRecord`) that
-  prevented the integration test suite from compiling
-- Tests wrote to a hardcoded `/tmp` path and failed on Windows
-- `wei_to_eth` converted through `f64`, silently rounding balances above
-  2^53 wei. Conversion now stays in `u128`
+### 变更
+- ETH 与 BTC 余额现在渲染方式完全一致：整数除法，去掉末尾多余的零。
+  1 BTC 显示为 `1`，而不是 `1.00000000`
+- `--no-color` 现在真的会关闭日志输出中的 ANSI 颜色
 
-## [0.3.0] - 2024-XX-XX
+### 移除
+- `batch` 子命令的 `--continue-on-error` 与 `--show-progress`。两者从未被读取过：
+  批量查询本来就会跳过失败继续执行，也不存在任何可以关闭的
+  进度输出
 
-### Added
-- Etherscan API V2 support (deprecated V1)
-- API Key configuration via environment variable or CLI argument
-- Debug logging for API requests
-- Enhanced error handling with better messages
+### 修复
+- 缺失的公开 re-export（`BlockchainType`、`Transaction`、`CsvRecord`），
+  它导致集成测试套件无法编译
+- 测试写入硬编码的 `/tmp` 路径，在 Windows 上必然失败
+- `wei_to_eth` 经由 `f64` 换算，会静默地对高于
+  2^53 wei 的余额四舍五入。换算现在全程留在 `u128` 中
 
-### Fixed
-- Ethereum balance display format (wei to ETH conversion)
-- Bitcoin balance calculation (now shows spendable balance, not total received)
+## [0.3.0] - 2026-04-12
 
-### Changed
-- Updated base URL for Ethereum API
-- Improved balance formatting (removes trailing zeros)
+### 新增
+- 支持 Etherscan API V2（V1 已弃用）
+- 通过环境变量或命令行参数配置 API Key
+- API 请求的调试日志
+- 更完善的错误处理与提示信息
 
-## [0.2.0] - 2024-XX-XX
+### 修复
+- 以太坊余额显示格式（wei 到 ETH 的换算）
+- 比特币余额计算（现在显示可用余额，而非累计收款）
 
-### Added
-- Bitcoin address support via Blockstream API
-- CSV export functionality
-- Batch query support
-- Transaction details display
+### 变更
+- 更新以太坊 API 的基础 URL
+- 改进余额格式化（去掉末尾多余的零）
 
-## [0.1.0] - 2024-XX-XX
+## [0.2.0] - 日期不详
 
-### Added
-- Initial release
-- Ethereum address query via Etherscan API
-- Basic CLI interface
-- Table and JSON output formats
+### 新增
+- 通过 Blockstream API 支持比特币地址
+- CSV 导出功能
+- 批量查询支持
+- 交易明细展示
+
+## [0.1.0] - 日期不详
+
+### 新增
+- 首个版本
+- 通过 Etherscan API 查询以太坊地址
+- 基础命令行界面
+- 表格与 JSON 输出格式

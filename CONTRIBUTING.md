@@ -9,61 +9,77 @@ AIGC:
     ReservedCode2: 3045022100a47cfefb60be1cf6995ec19702e0a701a5ff48061b1e70c5b840565713f2d08502207f2ab52e00853c94205a151b6149eebefcc794bb199e2e1803d88b8cb0a5a385
 ---
 
-# Contributing to Blockchain Explorer
+# 为 Blockchain Explorer 做贡献
 
-Thank you for your interest in contributing!
+**简体中文** | [English](CONTRIBUTING.en.md)
 
-## How to Contribute
+感谢你有兴趣参与本项目！
 
-### Reporting Bugs
+## 如何参与
 
-1. Check existing [issues](https://github.com/adomore/blockchain-explorer/issues) first
-2. Create a new issue with:
-   - Clear title and description
-   - Steps to reproduce
-   - Expected vs actual behavior
-   - Rust version and OS information
+### 报告缺陷
 
-### Suggesting Features
+1. 先检索已有的 [issues](https://github.com/adomore/blockchain-explorer/issues)
+2. 新建一个 issue，并说明：
+   - 清晰的标题与描述
+   - 复现步骤
+   - 期望行为与实际行为的差异
+   - Rust 版本与操作系统信息
 
-1. Create a new issue labeled as "enhancement"
-2. Describe the feature and its use case
-3. Explain why it would be beneficial
+### 提议新功能
 
-### Pull Requests
+1. 新建一个 issue，打上 "enhancement" 标签
+2. 描述这个功能以及它的使用场景
+3. 说明它为什么有价值
 
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature-name`
-3. Make your changes
-4. Run tests: `cargo test`
-5. Commit your changes: `git commit -m "Add feature: description"`
-6. Push to the branch: `git push origin feature/your-feature-name`
-7. Open a Pull Request
+### 提交 Pull Request
 
-### Code Style
+1. Fork 本仓库
+2. 新建一个分支：`git checkout -b feature/your-feature-name`
+3. 完成你的修改
+4. 运行测试：`cargo test`
+5. 提交修改：`git commit -m "Add feature: description"`
+6. 推送分支：`git push origin feature/your-feature-name`
+7. 发起 Pull Request
 
-- Follow Rust idioms and conventions
-- Run `cargo fmt` before committing
-- Run `cargo clippy` to check for common mistakes
-- Add tests for new functionality
+### 代码风格
 
-## Development Setup
+- 遵循 Rust 的惯用写法与约定
+- 提交前运行 `cargo fmt`
+- 运行 `cargo clippy` 检查常见问题——CI 会把警告当作错误
+- 为新增功能补充测试
+
+### 文档
+
+每份文档都有两个版本：中文原本与英文镜像，命名为
+`README.md` 与 `README.en.md`，变更日志和本指南同理。
+两侧必须保持 lockstep 一致——相同的标题、相同的顺序、相同的
+代码示例、相同的表格、相同的链接、相同的数字。只有正文可以翻译；
+代码示例只翻译其中的注释，别的一律不动。
+
+请在同一个提交里同时更新两侧，并在推送前自查：
 
 ```bash
-# Clone your fork
+python3 scripts/check_lockstep.py
+```
+
+## 开发环境准备
+
+```bash
+# 克隆你 fork 的仓库
 git clone https://github.com/adomore/blockchain-explorer.git
 cd blockchain-explorer
 
-# Install dependencies
+# 安装依赖
 cargo build
 
-# Run tests
+# 运行测试
 cargo test
 
-# Run with logging
+# 带日志运行
 RUST_LOG=debug cargo run -- query <ADDRESS>
 ```
 
-## License
+## 许可证
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+提交贡献即表示你同意你的贡献以 MIT 许可证授权。

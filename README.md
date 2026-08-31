@@ -1,5 +1,7 @@
 # Blockchain Explorer
 
+**简体中文** | [English](README.en.md)
+
 [![CI](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml/badge.svg)](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml)
 [![Rust](https://img.shields.io/badge/Rust-1.85+-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -201,7 +203,7 @@ blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 --format cs
 blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 -o result.json
 
 # 导出到文件并指定格式（json / csv）
-blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21     -o result.csv --export-format csv
+blockchain-explorer query 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21 -o result.csv --export-format csv
 ```
 
 `--format` 控制打印到终端的内容，`--export-format` 控制写入 `-o` 文件的内容，两者相互独立。
@@ -365,13 +367,16 @@ BTC 为 10^8 satoshi），去掉小数末尾多余的零。1 ETH 显示为 `1`�
 ```
 blockchain-explorer/
 ├── Cargo.toml            # 包定义（含 rust-version = 1.85）
-├── README.md
-├── CHANGELOG.md          # 版本变更记录
-├── CONTRIBUTING.md       # 贡献指南
+├── README.md             # 中文原本
+├── README.en.md          # 英文镜像
+├── CHANGELOG.md          # 版本变更记录（英文镜像见 .en.md）
+├── CONTRIBUTING.md       # 贡献指南（英文镜像见 .en.md）
 ├── LICENSE               # MIT
 ├── .github/
 │   └── workflows/
-│       └── ci.yml        # 三平台测试 + fmt/clippy + MSRV 校验
+│       └── ci.yml        # 三平台测试 + fmt/clippy + MSRV + lockstep 校验
+├── scripts/
+│   └── check_lockstep.py # EN/ZH 文档结构一致性闸门
 ├── src/
 │   ├── main.rs          # CLI 入口
 │   ├── lib.rs           # 库文件
@@ -427,7 +432,7 @@ cargo test --locked
 
 ### 重要说明
 
-- **Etherscan API V2**：自 2025 年 8 月 15 日起，原 V1 API 已弃用。本工具已更新为使用 V2 接口。
+- **Etherscan API V2**：原 V1 API 已于 2025-08-15 弃用。本工具已更新为使用 V2 接口。
 - **API Key**：强烈建议申请 Etherscan API Key 以避免速率限制
 - **Bitcoin**：使用公开的 Blockstream API，无需 API Key
 

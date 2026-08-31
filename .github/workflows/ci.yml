@@ -52,3 +52,15 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Check
         run: cargo check --all-targets --locked
+
+  docs:
+    # The documentation is bilingual and the two sides must not drift apart.
+    name: EN/ZH lockstep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Check documentation lockstep
+        run: python3 scripts/check_lockstep.py
