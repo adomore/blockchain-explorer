@@ -12,6 +12,14 @@ declared 0.3.0. 0.1.0 and 0.2.0 predate any recorded history here: there are no
 tags and no earlier commits, so they are left undated rather than given a
 made-up date.
 
+## [Unreleased]
+
+### Fixed
+- Corrected the declared MSRV from 1.85 to 1.86. The 1.85 figure counted only
+  the direct dependencies; the real floor comes from the `icu_*` 2.2.0 crates
+  pulled in transitively through `url` -> `idna`, which require 1.86. The MSRV
+  job caught this on its very first run
+
 ## [0.4.0] - 2026-08-31
 
 ### Added
@@ -25,8 +33,7 @@ made-up date.
 - Report entries record the line, column and occurrence count of each address
 - GitHub Actions CI: tests on Linux, macOS and Windows, plus `cargo fmt`,
   `cargo clippy -D warnings` and a job pinned to the declared MSRV
-- `rust-version = "1.85"` in `Cargo.toml`, matching the highest requirement
-  among the locked dependencies
+- `rust-version = "1.85"` declared in `Cargo.toml`
 - Unit tests for `blockchain::utils` and `models`, which had none
 - Every document now has a Chinese original and an English mirror, checked by
   `scripts/check_lockstep.py` in CI

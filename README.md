@@ -3,7 +3,7 @@
 **简体中文** | [English](README.en.md)
 
 [![CI](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml/badge.svg)](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml)
-[![Rust](https://img.shields.io/badge/Rust-1.85+-orange.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/Rust-1.86+-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > 一个用 Rust 编写的命令行工具，用于查询区块链（ETH、BTC）地址数据。
@@ -20,7 +20,7 @@
 
 ### 前置要求
 
-- **Rust 工具链** 1.85 或更高（stable）- 支持 Windows 11, macOS, Linux
+- **Rust 工具链** 1.86 或更高（stable）- 支持 Windows 11, macOS, Linux
 - **Git** - 用于克隆代码仓库
 
 ### 从源码编译
@@ -366,7 +366,7 @@ BTC 为 10^8 satoshi），去掉小数末尾多余的零。1 ETH 显示为 `1`�
 
 ```
 blockchain-explorer/
-├── Cargo.toml            # 包定义（含 rust-version = 1.85）
+├── Cargo.toml            # 包定义（含 rust-version = 1.86）
 ├── README.md             # 中文原本
 ├── README.en.md          # 英文镜像
 ├── CHANGELOG.md          # 版本变更记录（英文镜像见 .en.md）

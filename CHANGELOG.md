@@ -22,6 +22,13 @@ AIGC:
 0.1.0 与 0.2.0 早于这里的任何记录：仓库既没有 tag 也没有更早的提交，因此宁可
 不标日期，也不填一个编造出来的日期。
 
+## [未发布]
+
+### 修复
+- 声明的 MSRV 由 1.85 更正为 1.86。1.85 只统计了直接依赖；实际的下限来自
+  经 `url` → `idna` 传递引入的 `icu_*` 2.2.0，它们要求 1.86。CI 的 MSRV
+  任务在首次运行时就抓到了这一点
+
 ## [0.4.0] - 2026-08-31
 
 ### 新增
@@ -35,7 +42,7 @@ AIGC:
 - 报告条目记录每个地址的行号、列号与出现次数
 - GitHub Actions CI：在 Linux、macOS 与 Windows 上运行测试，另有 `cargo fmt`、
   `cargo clippy -D warnings` 以及一个固定在所声明 MSRV 上的任务
-- `Cargo.toml` 中的 `rust-version = "1.85"`，与锁定依赖中的最高要求一致
+- `Cargo.toml` 中的 `rust-version = "1.85"` 声明
 - `blockchain::utils` 与 `models` 的单元测试，此前两者都没有测试
 - 每份文档现在都有中文原本与英文镜像，由 CI 中的
   `scripts/check_lockstep.py` 校验

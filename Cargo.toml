@@ -4,9 +4,10 @@ version = "0.4.0"
 edition = "2021"
 authors = ["Blockchain Explorer Team"]
 description = "A command-line tool for retrieving blockchain data (ETH, BTC) - Updated for Etherscan API V2"
-# Highest rust-version among the dependencies in Cargo.lock (set by clap 4.6).
+# Highest rust-version among ALL locked dependencies, direct and transitive
+# (set by the icu_* 2.2.0 crates, pulled in through url -> idna).
 # CI pins a job to this exact toolchain so the claim stays true.
-rust-version = "1.85"
+rust-version = "1.86"
 license = "MIT"
 repository = "https://github.com/adomore/blockchain-explorer"
 

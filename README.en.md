@@ -3,7 +3,7 @@
 [简体中文](README.md) | **English**
 
 [![CI](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml/badge.svg)](https://github.com/adomore/blockchain-explorer/actions/workflows/ci.yml)
-[![Rust](https://img.shields.io/badge/Rust-1.85+-orange.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/Rust-1.86+-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 > A command-line tool written in Rust for querying blockchain (ETH, BTC) address data.
@@ -20,7 +20,7 @@
 
 ### Prerequisites
 
-- **Rust toolchain** 1.85 or newer (stable) - supports Windows 11, macOS, Linux
+- **Rust toolchain** 1.86 or newer (stable) - supports Windows 11, macOS, Linux
 - **Git** - to clone the repository
 
 ### Building from source
@@ -366,7 +366,7 @@ and never touches floating point, so large balances lose no precision.
 
 ```
 blockchain-explorer/
-├── Cargo.toml            # package manifest (rust-version = 1.85)
+├── Cargo.toml            # package manifest (rust-version = 1.86)
 ├── README.md             # Chinese original
 ├── README.en.md          # English mirror
 ├── CHANGELOG.md          # release notes (English mirror in .en.md)
