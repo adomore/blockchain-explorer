@@ -68,14 +68,8 @@ fn test_read_addresses_from_file_success() {
 
     let addresses = read_addresses_from_file(&temp_file).unwrap();
     assert_eq!(addresses.len(), 2);
-    assert_eq!(
-        addresses[0],
-        "0x1234567890123456789012345678901234567890"
-    );
-    assert_eq!(
-        addresses[1],
-        "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"
-    );
+    assert_eq!(addresses[0], "0x1234567890123456789012345678901234567890");
+    assert_eq!(addresses[1], "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd");
 }
 
 /// Test reading empty file
@@ -175,7 +169,10 @@ fn test_blockchain_detection_ethereum() {
     );
 
     // Invalid: not starting with 0x
-    assert_eq!(explorer.detect_blockchain("742d35Cc6634C0532925a3b844Bc9e7595f8fE21"), None);
+    assert_eq!(
+        explorer.detect_blockchain("742d35Cc6634C0532925a3b844Bc9e7595f8fE21"),
+        None
+    );
 
     // Invalid: wrong length
     assert_eq!(
@@ -298,10 +295,7 @@ fn test_batch_export() {
                 5,
             )),
         ),
-        (
-            "invalid".to_string(),
-            Err("Invalid address".to_string()),
-        ),
+        ("invalid".to_string(), Err("Invalid address".to_string())),
     ];
 
     let temp_file = temp_path("test_batch_export.csv");

@@ -235,10 +235,7 @@ mod tests {
 
         match args.command {
             Commands::Query(query) => {
-                assert_eq!(
-                    query.address,
-                    "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21"
-                );
+                assert_eq!(query.address, "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21");
                 assert!(matches!(query.blockchain, BlockchainArg::Auto));
             }
             _ => panic!("Expected Query command"),
@@ -306,9 +303,12 @@ mod tests {
 
     #[test]
     fn test_parse_detect_command() {
-        let args =
-            Cli::try_parse_from(["blockchain-explorer", "detect", "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"])
-                .unwrap();
+        let args = Cli::try_parse_from([
+            "blockchain-explorer",
+            "detect",
+            "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2",
+        ])
+        .unwrap();
 
         match args.command {
             Commands::Detect { address } => {

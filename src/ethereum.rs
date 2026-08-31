@@ -30,8 +30,8 @@ pub struct EthereumProvider {
 impl EthereumProvider {
     pub fn new() -> Self {
         // Try to get API key from environment variable
-        let api_key = std::env::var("ETHERSCAN_API_KEY")
-            .unwrap_or_else(|_| DEFAULT_API_KEY.to_string());
+        let api_key =
+            std::env::var("ETHERSCAN_API_KEY").unwrap_or_else(|_| DEFAULT_API_KEY.to_string());
 
         Self {
             client: Client::builder()
@@ -56,8 +56,8 @@ impl EthereumProvider {
     }
 
     pub fn with_base_url(base_url: &str) -> Self {
-        let api_key = std::env::var("ETHERSCAN_API_KEY")
-            .unwrap_or_else(|_| DEFAULT_API_KEY.to_string());
+        let api_key =
+            std::env::var("ETHERSCAN_API_KEY").unwrap_or_else(|_| DEFAULT_API_KEY.to_string());
 
         Self {
             client: Client::builder()
@@ -77,7 +77,10 @@ impl EthereumProvider {
             self.base_url, ETH_CHAIN_ID, address, self.api_key
         );
 
-        tracing::debug!("Fetching balance from: {}", url.replace(&self.api_key, "***"));
+        tracing::debug!(
+            "Fetching balance from: {}",
+            url.replace(&self.api_key, "***")
+        );
 
         let response = self
             .client
@@ -91,8 +94,12 @@ impl EthereumProvider {
             .await
             .map_err(|e| BlockchainError::ParseError(e.to_string()))?;
 
-        tracing::debug!("API Response: status={}, message={}, result={}",
-            data.status, data.message, data.result);
+        tracing::debug!(
+            "API Response: status={}, message={}, result={}",
+            data.status,
+            data.message,
+            data.result
+        );
 
         if data.status == "1" {
             // Convert wei to ETH for display
@@ -100,7 +107,10 @@ impl EthereumProvider {
         } else if data.result.contains("rate limit") {
             Err(BlockchainError::RateLimitExceeded)
         } else if data.result.contains("Invalid API Key") || data.result.contains("rate limit") {
-            Err(BlockchainError::ApiError(format!("API Error: {} - {}", data.message, data.result)))
+            Err(BlockchainError::ApiError(format!(
+                "API Error: {} - {}",
+                data.message, data.result
+            )))
         } else {
             // For addresses without transactions, 0 is returned
             Ok(Self::wei_to_eth(&data.result))
@@ -115,7 +125,10 @@ impl EthereumProvider {
             self.base_url, ETH_CHAIN_ID, address, self.api_key
         );
 
-        tracing::debug!("Fetching transactions from: {}", url.replace(&self.api_key, "***"));
+        tracing::debug!(
+            "Fetching transactions from: {}",
+            url.replace(&self.api_key, "***")
+        );
 
         let response = self
             .client
@@ -129,8 +142,12 @@ impl EthereumProvider {
             .await
             .map_err(|e| BlockchainError::ParseError(e.to_string()))?;
 
-        tracing::debug!("API Response: status={}, message={}, result_count={}",
-            data.status, data.message, data.result.len());
+        tracing::debug!(
+            "API Response: status={}, message={}, result_count={}",
+            data.status,
+            data.message,
+            data.result.len()
+        );
 
         let mut transactions = Vec::new();
 
@@ -145,7 +162,11 @@ impl EthereumProvider {
                     block_number: tx.block_number.parse().ok(),
                     gas_used: Some(tx.gas_used),
                     gas_price: Some(Self::wei_to_eth(&tx.gas_price)),
-                    status: if tx.is_error == "0" { "Success".to_string() } else { "Failed".to_string() },
+                    status: if tx.is_error == "0" {
+                        "Success".to_string()
+                    } else {
+                        "Failed".to_string()
+                    },
                 });
             }
         } else if data.message != "OK" && !data.message.is_empty() {
@@ -182,7 +203,9 @@ impl BlockchainProvider for EthereumProvider {
 
     fn supports_address(&self, address: &str) -> bool {
         let addr = address.trim();
-        addr.starts_with("0x") && addr.len() == 42 && addr[2..].chars().all(|c| c.is_ascii_hexdigit())
+        addr.starts_with("0x")
+            && addr.len() == 42
+            && addr[2..].chars().all(|c| c.is_ascii_hexdigit())
     }
 
     async fn get_address_info(&self, address: &str) -> Result<AddressInfo, BlockchainError> {
@@ -253,19 +276,17 @@ impl MockEthereumProvider {
     pub fn new() -> Self {
         Self {
             mock_balance: "1000000000000000000".to_string(), // 1 ETH in wei
-            mock_transactions: vec![
-                Transaction {
-                    hash: "0xabc123".to_string(),
-                    from: "0xfrom123".to_string(),
-                    to: "0xto456".to_string(),
-                    value: "0.5".to_string(),
-                    timestamp: Some(1234567890),
-                    block_number: Some(12345678),
-                    gas_used: Some("21000".to_string()),
-                    gas_price: Some("0.000000020".to_string()),
-                    status: "Success".to_string(),
-                },
-            ],
+            mock_transactions: vec![Transaction {
+                hash: "0xabc123".to_string(),
+                from: "0xfrom123".to_string(),
+                to: "0xto456".to_string(),
+                value: "0.5".to_string(),
+                timestamp: Some(1234567890),
+                block_number: Some(12345678),
+                gas_used: Some("21000".to_string()),
+                gas_price: Some("0.000000020".to_string()),
+                status: "Success".to_string(),
+            }],
         }
     }
 }
@@ -320,7 +341,10 @@ mod tests {
 
         // Test with trailing zeros
         assert_eq!(EthereumProvider::wei_to_eth("10000000000000000"), "0.01");
-        assert_eq!(EthereumProvider::wei_to_eth("8627620683100812558"), "8.627620683100812558");
+        assert_eq!(
+            EthereumProvider::wei_to_eth("8627620683100812558"),
+            "8.627620683100812558"
+        );
 
         // Test with small amounts (should keep 8 decimal places minimum)
         assert_eq!(EthereumProvider::wei_to_eth("100000000000000"), "0.0001");
@@ -343,7 +367,10 @@ mod tests {
     #[tokio::test]
     async fn test_mock_provider() {
         let provider = MockEthereumProvider::new();
-        let info = provider.get_address_info("0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21").await.unwrap();
+        let info = provider
+            .get_address_info("0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21")
+            .await
+            .unwrap();
 
         assert_eq!(info.blockchain, "Ethereum");
         assert_eq!(info.total_transactions, 1);

@@ -3,16 +3,16 @@
 //! A Rust library for querying blockchain data from Ethereum and Bitcoin networks.
 
 pub mod address_match;
-pub mod blockchain;
 pub mod bitcoin;
+pub mod blockchain;
 pub mod checksum;
 pub mod cli;
 pub mod csv_export;
 pub mod ethereum;
 pub mod models;
 
-use blockchain::{BlockchainError, BlockchainProvider};
 use bitcoin::BitcoinProvider;
+use blockchain::{BlockchainError, BlockchainProvider};
 use ethereum::EthereumProvider;
 use std::sync::Arc;
 
@@ -62,7 +62,10 @@ impl Explorer {
     }
 
     /// Get the appropriate provider for an address
-    fn get_provider(&self, blockchain: Option<BlockchainType>) -> Option<Arc<dyn BlockchainProvider>> {
+    fn get_provider(
+        &self,
+        blockchain: Option<BlockchainType>,
+    ) -> Option<Arc<dyn BlockchainProvider>> {
         match blockchain {
             Some(BlockchainType::Ethereum) => Some(self.eth_provider.clone()),
             Some(BlockchainType::Bitcoin) => Some(self.btc_provider.clone()),
@@ -92,7 +95,11 @@ impl Explorer {
     }
 
     /// Query address information
-    pub async fn query(&self, address: &str, blockchain: Option<BlockchainType>) -> Result<models::AddressInfo, BlockchainError> {
+    pub async fn query(
+        &self,
+        address: &str,
+        blockchain: Option<BlockchainType>,
+    ) -> Result<models::AddressInfo, BlockchainError> {
         let provider = match self.get_provider(blockchain) {
             Some(p) => p,
             None => self.detect_and_get_provider(address)?,
@@ -136,7 +143,10 @@ impl Explorer {
                     }
                 };
 
-                provider.get_address_info(&address).await.map_err(|e| e.to_string())
+                provider
+                    .get_address_info(&address)
+                    .await
+                    .map_err(|e| e.to_string())
             });
 
             handles.push(handle);

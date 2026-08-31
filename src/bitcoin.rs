@@ -61,12 +61,18 @@ impl BitcoinProvider {
 
         // Calculate actual balance: Total Received (funded) - Total Sent (spent)
         // This gives the spendable balance (unspent outputs)
-        let balance_sats = data.chain_stats.funded_txo_sum.saturating_sub(data.chain_stats.spent_txo_sum);
+        let balance_sats = data
+            .chain_stats
+            .funded_txo_sum
+            .saturating_sub(data.chain_stats.spent_txo_sum);
         Ok(Self::sats_to_btc(balance_sats))
     }
 
     /// Fetch transactions for a Bitcoin address
-    pub async fn fetch_transactions(&self, address: &str) -> Result<Vec<Transaction>, BlockchainError> {
+    pub async fn fetch_transactions(
+        &self,
+        address: &str,
+    ) -> Result<Vec<Transaction>, BlockchainError> {
         let url = format!("{}/address/{}/txs", self.base_url, address);
 
         let response = self
@@ -92,8 +98,14 @@ impl BitcoinProvider {
 
         for tx in txs {
             // Determine if address is sender or receiver
-            let is_sent = tx.vin.iter().any(|input| input.prevout.scriptpubkey_address == Some(address.to_string()));
-            let is_received = tx.vout.iter().any(|output| output.scriptpubkey_address == Some(address.to_string()));
+            let is_sent = tx
+                .vin
+                .iter()
+                .any(|input| input.prevout.scriptpubkey_address == Some(address.to_string()));
+            let is_received = tx
+                .vout
+                .iter()
+                .any(|output| output.scriptpubkey_address == Some(address.to_string()));
 
             if is_sent {
                 for output in &tx.vout {
@@ -118,7 +130,11 @@ impl BitcoinProvider {
                     if output.scriptpubkey_address.as_deref() == Some(address) {
                         transactions.push(Transaction {
                             hash: tx.txid.clone(),
-                            from: tx.vin.first().map(|i| i.prevout.scriptpubkey_address.clone().unwrap_or_default()).unwrap_or_default(),
+                            from: tx
+                                .vin
+                                .first()
+                                .map(|i| i.prevout.scriptpubkey_address.clone().unwrap_or_default())
+                                .unwrap_or_default(),
                             to: address.to_string(),
                             value: Self::sats_to_btc(output.value),
                             timestamp: Some(tx.status.block_time as i64),
@@ -159,7 +175,9 @@ impl BitcoinProvider {
 
         // Bech32: starts with bc1, 42-62 characters
         if addr.starts_with("bc1") && (42..=62).contains(&addr.len()) {
-            return addr.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit());
+            return addr
+                .chars()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit());
         }
 
         false
@@ -264,19 +282,17 @@ impl MockBitcoinProvider {
     pub fn new() -> Self {
         Self {
             mock_balance: "1.5".to_string(),
-            mock_transactions: vec![
-                Transaction {
-                    hash: "abc123def456".to_string(),
-                    from: "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2".to_string(),
-                    to: "1CounterpartyXXXXXXXXXXXXXXXUWLpVr".to_string(),
-                    value: "0.5".to_string(),
-                    timestamp: Some(1234567890),
-                    block_number: Some(123456),
-                    gas_used: None,
-                    gas_price: None,
-                    status: "Confirmed".to_string(),
-                },
-            ],
+            mock_transactions: vec![Transaction {
+                hash: "abc123def456".to_string(),
+                from: "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2".to_string(),
+                to: "1CounterpartyXXXXXXXXXXXXXXXUWLpVr".to_string(),
+                value: "0.5".to_string(),
+                timestamp: Some(1234567890),
+                block_number: Some(123456),
+                gas_used: None,
+                gas_price: None,
+                status: "Confirmed".to_string(),
+            }],
         }
     }
 }
@@ -325,17 +341,27 @@ mod tests {
     #[test]
     fn test_btc_address_validation() {
         // Valid P2PKH addresses
-        assert!(BitcoinProvider::is_valid_address("1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"));
-        assert!(BitcoinProvider::is_valid_address("1CounterpartyXXXXXXXXXXXXXXXUWLpVr"));
+        assert!(BitcoinProvider::is_valid_address(
+            "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
+        ));
+        assert!(BitcoinProvider::is_valid_address(
+            "1CounterpartyXXXXXXXXXXXXXXXUWLpVr"
+        ));
 
         // Valid P2SH addresses
-        assert!(BitcoinProvider::is_valid_address("3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy"));
+        assert!(BitcoinProvider::is_valid_address(
+            "3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy"
+        ));
 
         // Valid Bech32 addresses
-        assert!(BitcoinProvider::is_valid_address("bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"));
+        assert!(BitcoinProvider::is_valid_address(
+            "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"
+        ));
 
         // Invalid addresses
-        assert!(!BitcoinProvider::is_valid_address("0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21")); // ETH format
+        assert!(!BitcoinProvider::is_valid_address(
+            "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21"
+        )); // ETH format
         assert!(!BitcoinProvider::is_valid_address("short")); // Too short
     }
 

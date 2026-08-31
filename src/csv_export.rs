@@ -189,11 +189,12 @@ pub fn export_matches_to_csv(
 
 /// Export to CSV from string data (for CLI piping)
 pub fn export_from_str(data: &str, output_path: &str) -> Result<(), CsvExportError> {
-    let addresses: Vec<AddressInfo> = serde_json::from_str(data)
-        .map_err(|e| CsvExportError::CsvError(csv::Error::from(io::Error::new(
+    let addresses: Vec<AddressInfo> = serde_json::from_str(data).map_err(|e| {
+        CsvExportError::CsvError(csv::Error::from(io::Error::new(
             io::ErrorKind::InvalidData,
             e,
-        ))))?;
+        )))
+    })?;
 
     export_to_csv(&addresses, output_path)
 }
@@ -263,7 +264,10 @@ mod tests {
     fn test_export_batch_results() {
         let info = create_test_address_info();
         let results = vec![
-            ("0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21".to_string(), Ok(info)),
+            (
+                "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21".to_string(),
+                Ok(info),
+            ),
             (
                 "invalid".to_string(),
                 Err("Invalid address format".to_string()),

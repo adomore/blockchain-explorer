@@ -73,7 +73,7 @@ fn create_explorer(api_key: Option<&str>) -> Explorer {
         Some(key) => {
             // Mask API key for logging (show first 4 and last 4 characters)
             let masked_key = if key.len() > 8 {
-                format!("{}...{}", &key[..4], &key[key.len()-4..])
+                format!("{}...{}", &key[..4], &key[key.len() - 4..])
             } else {
                 "***".to_string()
             };
@@ -153,9 +153,14 @@ async fn handle_batch(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     println!("Found {} addresses to query", addresses.len());
     println!("Parallel queries: {}", args.parallel);
 
-    let blockchain = args.blockchain.as_ref().and_then(|b| b.to_blockchain_type());
+    let blockchain = args
+        .blockchain
+        .as_ref()
+        .and_then(|b| b.to_blockchain_type());
 
-    let result = explorer.batch_query(addresses.clone(), blockchain, args.parallel).await;
+    let result = explorer
+        .batch_query(addresses.clone(), blockchain, args.parallel)
+        .await;
 
     println!("\nBatch Query Results:");
     println!("  Total:     {}", result.total);
@@ -250,7 +255,11 @@ fn handle_export(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     let addresses: Vec<AddressInfo> = serde_json::from_str(&content)?;
 
     csv_export::export_to_csv(&addresses, args.output.to_str().unwrap())?;
-    info!("Exported {} addresses to: {}", addresses.len(), args.output.display());
+    info!(
+        "Exported {} addresses to: {}",
+        addresses.len(),
+        args.output.display()
+    );
 
     Ok(())
 }
@@ -281,8 +290,10 @@ async fn handle_compare(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Print comparison table
-    println!("\n{:<42} {:<12} {:<15} {:<10}",
-        "Address", "Blockchain", "Balance", "Tx Count");
+    println!(
+        "\n{:<42} {:<12} {:<15} {:<10}",
+        "Address", "Blockchain", "Balance", "Tx Count"
+    );
     println!("{}", "-".repeat(80));
 
     for info in &results {
