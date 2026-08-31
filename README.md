@@ -11,6 +11,7 @@
 **功能特性：**
 - 🔗 查询 ETH/BTC 地址的余额和交易明细
 - 📦 支持批量查询地址列表
+- 🔍 从任意文本文件中匹配 BTC/ETH 地址（Base58Check / Bech32 校验和验证）
 - 📊 支持导出 CSV 格式
 - ⚡ 异步并行查询，高效处理
 - 🔒 开源 MIT 许可证
@@ -207,6 +208,75 @@ blockchain-explorer batch addresses.txt -o results.csv
 blockchain-explorer batch addresses.txt -o results.csv --parallel 10
 ```
 
+### 从文本文件中匹配地址
+
+与 `batch`（每行一个地址）不同，`match` 子命令会扫描**任意文本文件**——日志、
+聊天记录、笔记、JSON、HTML 都可以——把其中的 BTC/ETH 地址找出来，并将结果写入文件。
+
+```bash
+# 扫描文本文件，结果写入默认输出文件 matches.txt
+blockchain-explorer match notes.txt
+
+# 指定输出文件；输出格式按扩展名自动推断（.csv / .json，其余为表格）
+blockchain-explorer match notes.txt -o result.csv
+blockchain-explorer match notes.txt -o result.json
+
+# 显式指定输出格式（table / csv / json）
+blockchain-explorer match notes.txt -o result.out --format json
+
+# 只匹配某一条链
+blockchain-explorer match notes.txt -o btc.csv --blockchain bitcoin
+
+# 只按格式匹配，不验证比特币校验和（示例地址、伪造地址也会命中）
+blockchain-explorer match notes.txt -o all.csv --no-checksum
+
+# 列出每一次出现，而不是按地址去重
+blockchain-explorer match notes.txt -o all.csv --all-occurrences
+
+# 匹配之后顺带查询余额与交易数（需要联网）
+blockchain-explorer match notes.txt -o result.csv --query --parallel 10
+```
+
+**匹配规则：**
+
+| 地址类型 | 格式 | 校验方式 |
+|----------|------|----------|
+| Ethereum | `0x` + 40 位十六进制字符 | 仅格式校验（不验证 EIP-55 大小写校验和） |
+| Bitcoin P2PKH / P2SH | `1...` / `3...`，26-35 位 Base58 字符 | Base58Check 校验和 |
+| Bitcoin SegWit | `bc1...`（P2WPKH / P2WSH / P2TR） | Bech32 / Bech32m 校验和（BIP-173 / BIP-350） |
+
+- 地址两侧必须是非字母数字字符；粘在其它文字里的地址不会被匹配（如 `abc0x742d...`）。
+- 交易哈希（`0x` + 64 位十六进制）等不会被误判成地址。
+- 默认按地址去重，并记录首次出现的行号、列号与出现次数。
+- 文件以 UTF-8 宽松方式解码，非法 UTF-8 的日志文件同样可以扫描。
+- 使用 `--no-checksum` 时只做格式匹配，误报会明显增多。
+
+**输出示例（默认表格格式）：**
+
+```
+=========================================================================================
+BTC / ETH Address Match Report
+=========================================================================================
+Source File:           notes.txt
+Scanned Lines:         9
+Matched Occurrences:   6
+Unique Addresses:      5
+  Ethereum:            1
+  Bitcoin:             4
+Checksum Verified:     yes
+Balance Queried:       no
+-----------------------------------------------------------------------------------------
+#    Chain    Type    Checksum    Line   Col  Hits Address
+-----------------------------------------------------------------------------------------
+1    Ethereum ETH     N/A            2    14     2 0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21
+2    Bitcoin  P2PKH   Verified       3    12     1 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+3    Bitcoin  P2SH    Verified       3    58     1 3J98t1WpEZ73CNmQviecrnyiWrnqRhWNLy
+4    Bitcoin  P2WPKH  Verified       4    36     1 bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq
+```
+
+CSV 输出包含 `Index,Address,Blockchain,Address_Type,Checksum,Line,Column,Occurrences,Balance,Total_Transactions,Query_Error,Context`；
+JSON 输出为完整的匹配报告，可直接被程序读取。
+
 ### 地址类型检测
 
 ```bash
@@ -279,6 +349,8 @@ blockchain-explorer/
 │   ├── blockchain.rs    # 区块链 trait
 │   ├── ethereum.rs      # Ethereum 提供者
 │   ├── bitcoin.rs       # Bitcoin 提供者
+│   ├── address_match.rs # 文本地址匹配与报告输出
+│   ├── checksum.rs      # Base58Check / Bech32 校验和
 │   └── csv_export.rs    # CSV 导出
 └── tests/
     └── integration_tests.rs  # 集成测试

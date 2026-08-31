@@ -1,9 +1,11 @@
 //! CSV export functionality
 
+use crate::address_match::MatchReport;
 use crate::models::{AddressInfo, CsvRecord};
 use csv::Writer;
 use std::fs::File;
 use std::io;
+use std::path::Path;
 use thiserror::Error;
 
 /// Errors that can occur during CSV export
@@ -133,6 +135,58 @@ pub fn export_batch_to_csv(
     Ok(())
 }
 
+/// Export the addresses matched in a text file to CSV
+///
+/// Unlike the other exports this one always writes the header, so an empty
+/// report still produces a valid file.
+pub fn export_matches_to_csv(
+    report: &MatchReport,
+    output_path: &Path,
+) -> Result<(), CsvExportError> {
+    let file = File::create(output_path)?;
+    let mut writer = Writer::from_writer(file);
+
+    // Write header
+    writer.write_record(&[
+        "Index",
+        "Address",
+        "Blockchain",
+        "Address_Type",
+        "Checksum",
+        "Line",
+        "Column",
+        "Occurrences",
+        "Balance",
+        "Total_Transactions",
+        "Query_Error",
+        "Context",
+    ])?;
+
+    // Write data rows
+    for (index, entry) in report.matches.iter().enumerate() {
+        writer.write_record(&[
+            &(index + 1).to_string(),
+            &entry.address,
+            entry.blockchain.as_str(),
+            entry.kind.as_str(),
+            entry.checksum.as_str(),
+            &entry.line.to_string(),
+            &entry.column.to_string(),
+            &entry.occurrences.to_string(),
+            entry.balance.as_deref().unwrap_or("N/A"),
+            &entry
+                .total_transactions
+                .map(|count| count.to_string())
+                .unwrap_or_else(|| "N/A".to_string()),
+            entry.query_error.as_deref().unwrap_or("N/A"),
+            &entry.context,
+        ])?;
+    }
+
+    writer.flush()?;
+    Ok(())
+}
+
 /// Export to CSV from string data (for CLI piping)
 pub fn export_from_str(data: &str, output_path: &str) -> Result<(), CsvExportError> {
     let addresses: Vec<AddressInfo> = serde_json::from_str(data)
@@ -186,13 +240,13 @@ mod tests {
     #[test]
     fn test_export_to_csv() {
         let info = create_test_address_info();
-        let temp_path = "/tmp/test_export.csv";
+        let temp_path = crate::temp_file_path("test_export.csv");
 
-        let result = export_to_csv(&[info], temp_path);
+        let result = export_to_csv(&[info], &temp_path);
         assert!(result.is_ok());
 
         // Read back and verify
-        let content = std::fs::read_to_string(temp_path).unwrap();
+        let content = std::fs::read_to_string(&temp_path).unwrap();
         assert!(content.contains("0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21"));
         assert!(content.contains("Ethereum"));
         assert!(content.contains("1.5"));
@@ -200,7 +254,7 @@ mod tests {
 
     #[test]
     fn test_export_empty_data() {
-        let result = export_to_csv(&[], "/tmp/empty.csv");
+        let result = export_to_csv(&[], &crate::temp_file_path("empty.csv"));
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), CsvExportError::NoData));
     }
@@ -216,12 +270,12 @@ mod tests {
             ),
         ];
 
-        let temp_path = "/tmp/test_batch_export.csv";
-        let result = export_batch_to_csv(&results, temp_path);
+        let temp_path = crate::temp_file_path("test_batch_export.csv");
+        let result = export_batch_to_csv(&results, &temp_path);
         assert!(result.is_ok());
 
         // Read back and verify
-        let content = std::fs::read_to_string(temp_path).unwrap();
+        let content = std::fs::read_to_string(&temp_path).unwrap();
         assert!(content.contains("Success"));
         assert!(content.contains("Failed"));
     }

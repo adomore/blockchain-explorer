@@ -16,6 +16,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- `match` command: scan any text file for BTC/ETH addresses and write the
+  result to a file (table, CSV or JSON, inferred from the output extension)
+- Bitcoin checksum verification: Base58Check for `1.../3...` and
+  Bech32/Bech32m (BIP-173 / BIP-350) for `bc1...`, with address type detection
+  (P2PKH, P2SH, P2WPKH, P2WSH, P2TR)
+- `--no-checksum`, `--all-occurrences`, `--blockchain` and `--query` options
+  for the `match` command
+- Report entries record the line, column and occurrence count of each address
+
+### Fixed
+- Missing public re-exports (`BlockchainType`, `Transaction`, `CsvRecord`) that
+  prevented the integration test suite from compiling
+- Tests wrote to a hardcoded `/tmp` path and failed on Windows
+
 ## [0.3.0] - 2024-XX-XX
 
 ### Added

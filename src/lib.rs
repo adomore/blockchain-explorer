@@ -2,8 +2,10 @@
 //!
 //! A Rust library for querying blockchain data from Ethereum and Bitcoin networks.
 
+pub mod address_match;
 pub mod blockchain;
 pub mod bitcoin;
+pub mod checksum;
 pub mod cli;
 pub mod csv_export;
 pub mod ethereum;
@@ -12,11 +14,14 @@ pub mod models;
 use blockchain::{BlockchainError, BlockchainProvider};
 use bitcoin::BitcoinProvider;
 use ethereum::EthereumProvider;
-use models::BlockchainType;
 use std::sync::Arc;
 
 // Re-export types for public API
-pub use models::{AddressInfo, BatchResult};
+pub use address_match::{
+    match_file, render_text_report, scan_text, write_report, AddressMatch, MatchOptions,
+    MatchReport, ReportFormat,
+};
+pub use models::{AddressInfo, BatchResult, BlockchainType, CsvRecord, Transaction};
 
 /// Explorer client for querying blockchain data
 pub struct Explorer {
@@ -166,6 +171,14 @@ pub fn read_addresses_from_file(path: &str) -> Result<Vec<String>, std::io::Erro
     Ok(addresses)
 }
 
+/// Path of a scratch file inside the platform temporary directory
+#[cfg(test)]
+pub(crate) fn temp_file_path(name: &str) -> String {
+    let mut path = std::env::temp_dir();
+    path.push(name);
+    path.to_string_lossy().into_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,10 +233,10 @@ mod tests {
     #[test]
     fn test_read_addresses_from_file() {
         let content = "# Comments\n0x123\n\n0x456\n";
-        let path = "/tmp/test_addresses.txt";
-        std::fs::write(path, content).unwrap();
+        let path = crate::temp_file_path("test_addresses.txt");
+        std::fs::write(&path, content).unwrap();
 
-        let addresses = read_addresses_from_file(path).unwrap();
+        let addresses = read_addresses_from_file(&path).unwrap();
         assert_eq!(addresses.len(), 2);
         assert_eq!(addresses[0], "0x123");
         assert_eq!(addresses[1], "0x456");

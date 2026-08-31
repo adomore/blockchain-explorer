@@ -81,6 +81,44 @@ pub struct BatchArgs {
     pub show_progress: bool,
 }
 
+/// Match BTC/ETH addresses inside a text file
+#[derive(Parser, Debug)]
+#[command(name = "match")]
+#[command(about = "Match BTC/ETH addresses in a text file and write the result to a file")]
+pub struct MatchArgs {
+    /// Text file to scan (logs, notes, exports, any text)
+    #[arg(value_name = "FILE")]
+    pub file: PathBuf,
+
+    /// Output file for the match result
+    #[arg(short, long, default_value = "matches.txt")]
+    pub output: PathBuf,
+
+    /// Output format (defaults to the output file extension, otherwise table)
+    #[arg(short, long, value_enum)]
+    pub format: Option<OutputFormat>,
+
+    /// Only match addresses of this blockchain (default: both)
+    #[arg(short, long, value_enum)]
+    pub blockchain: Option<BlockchainArg>,
+
+    /// Match on format only, without verifying Bitcoin checksums
+    #[arg(long, default_value_t = false)]
+    pub no_checksum: bool,
+
+    /// List every occurrence instead of unique addresses
+    #[arg(long, default_value_t = false)]
+    pub all_occurrences: bool,
+
+    /// Also query balance and transaction count for every matched address
+    #[arg(long, default_value_t = false)]
+    pub query: bool,
+
+    /// Parallel queries (only used with --query)
+    #[arg(short, long, default_value_t = 5)]
+    pub parallel: usize,
+}
+
 /// Export existing results to different formats
 #[derive(Parser, Debug)]
 #[command(name = "export")]
@@ -158,6 +196,9 @@ pub enum Commands {
     /// Batch query multiple addresses from a file
     Batch(BatchArgs),
 
+    /// Match BTC/ETH addresses in a text file and write the result to a file
+    Match(MatchArgs),
+
     /// Export results to CSV
     Export(ExportArgs),
 
@@ -221,6 +262,45 @@ mod tests {
                 assert_eq!(batch.output, PathBuf::from("output.csv"));
             }
             _ => panic!("Expected Batch command"),
+        }
+    }
+
+    #[test]
+    fn test_parse_match_command() {
+        let args = Cli::try_parse_from(&[
+            "blockchain-explorer",
+            "match",
+            "notes.txt",
+            "-o",
+            "found.csv",
+            "--no-checksum",
+        ])
+        .unwrap();
+
+        match args.command {
+            Commands::Match(matched) => {
+                assert_eq!(matched.file, PathBuf::from("notes.txt"));
+                assert_eq!(matched.output, PathBuf::from("found.csv"));
+                assert!(matched.no_checksum);
+                assert!(!matched.query);
+                assert!(matched.format.is_none());
+            }
+            _ => panic!("Expected Match command"),
+        }
+    }
+
+    #[test]
+    fn test_match_command_defaults() {
+        let args = Cli::try_parse_from(&["blockchain-explorer", "match", "notes.txt"]).unwrap();
+
+        match args.command {
+            Commands::Match(matched) => {
+                assert_eq!(matched.output, PathBuf::from("matches.txt"));
+                assert_eq!(matched.parallel, 5);
+                assert!(!matched.all_occurrences);
+                assert!(matched.blockchain.is_none());
+            }
+            _ => panic!("Expected Match command"),
         }
     }
 

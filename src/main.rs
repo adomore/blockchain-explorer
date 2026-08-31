@@ -7,8 +7,8 @@
 //! Get your free API key at: https://etherscan.io/apidashboard
 
 use blockchain_explorer::{
-    cli::Cli,
-    csv_export, read_addresses_from_file, AddressInfo, Explorer,
+    address_match, cli::Cli, csv_export, read_addresses_from_file, AddressInfo, Explorer,
+    MatchOptions, ReportFormat,
 };
 use tracing::{error, info, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -176,6 +176,68 @@ async fn handle_batch(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+/// Handle match command
+async fn handle_match(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
+    let blockchain_explorer::cli::Commands::Match(args) = &cli.command else {
+        unreachable!();
+    };
+
+    info!("Scanning file: {}", args.file.display());
+
+    let options = MatchOptions {
+        blockchain: args
+            .blockchain
+            .as_ref()
+            .and_then(|b| b.to_blockchain_type()),
+        verify_checksum: !args.no_checksum,
+        unique: !args.all_occurrences,
+        ..MatchOptions::default()
+    };
+
+    let mut report = address_match::match_file(&args.file, &options)?;
+
+    println!("\nAddress Match Results:");
+    println!("  {:<20} {}", "Scanned lines:", report.scanned_lines);
+    println!("  {:<20} {}", "Occurrences:", report.total_occurrences);
+    println!("  {:<20} {}", "Unique addresses:", report.unique_addresses);
+    println!("  {:<20} {}", "  Ethereum:", report.ethereum_addresses);
+    println!("  {:<20} {}", "  Bitcoin:", report.bitcoin_addresses);
+
+    if report.matches.is_empty() {
+        println!("\nNo BTC/ETH addresses matched.");
+    } else if args.query {
+        let explorer = create_explorer(cli.etherscan_api_key.as_deref());
+        let parallel = args.parallel.max(1);
+        let addresses = report.addresses();
+
+        println!(
+            "\nQuerying {} addresses (parallel: {})...",
+            addresses.len(),
+            parallel
+        );
+
+        let batch = explorer.batch_query(addresses, None, parallel).await;
+
+        println!("  Success:   {}", batch.successful);
+        println!("  Failed:    {}", batch.failed);
+
+        report.apply_query_results(batch);
+    }
+
+    // An explicit --format wins, otherwise the output extension decides
+    let format = match args.format {
+        Some(blockchain_explorer::cli::OutputFormat::Csv) => ReportFormat::Csv,
+        Some(blockchain_explorer::cli::OutputFormat::Json) => ReportFormat::Json,
+        Some(blockchain_explorer::cli::OutputFormat::Table) => ReportFormat::Text,
+        None => ReportFormat::from_path(&args.output),
+    };
+
+    address_match::write_report(&report, &args.output, format)?;
+    info!("Results written to: {}", args.output.display());
+
+    Ok(())
+}
+
 /// Handle export command
 fn handle_export(cli: &Cli) -> Result<(), Box<dyn std::error::Error>> {
     let blockchain_explorer::cli::Commands::Export(args) = &cli.command else {
@@ -278,6 +340,7 @@ async fn main() {
     let result = match &cli.command {
         blockchain_explorer::cli::Commands::Query(_) => handle_query(&cli).await,
         blockchain_explorer::cli::Commands::Batch(_) => handle_batch(&cli).await,
+        blockchain_explorer::cli::Commands::Match(_) => handle_match(&cli).await,
         blockchain_explorer::cli::Commands::Export(_) => handle_export(&cli),
         blockchain_explorer::cli::Commands::Compare(_) => handle_compare(&cli).await,
         blockchain_explorer::cli::Commands::Detect { address } => {
