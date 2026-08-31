@@ -117,7 +117,6 @@ impl Explorer {
             let eth_provider = self.eth_provider.clone();
             let btc_provider = self.btc_provider.clone();
             let semaphore = semaphore.clone();
-            let blockchain = blockchain;
 
             let handle = tokio::spawn(async move {
                 let _permit = semaphore.acquire().await.ok();

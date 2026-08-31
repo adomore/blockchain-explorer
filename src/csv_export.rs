@@ -31,7 +31,7 @@ pub fn export_to_csv(addresses: &[AddressInfo], output_path: &str) -> Result<(),
     let mut writer = Writer::from_writer(file);
 
     // Write header
-    writer.write_record(&[
+    writer.write_record([
         "Address",
         "Blockchain",
         "Balance",
@@ -52,7 +52,7 @@ pub fn export_to_csv(addresses: &[AddressInfo], output_path: &str) -> Result<(),
     // Write data rows
     for info in addresses {
         let record = CsvRecord::from(info);
-        writer.write_record(&[
+        writer.write_record([
             &record.address,
             &record.blockchain,
             &record.balance,
@@ -88,7 +88,7 @@ pub fn export_batch_to_csv(
     let mut writer = Writer::from_writer(file);
 
     // Write header
-    writer.write_record(&[
+    writer.write_record([
         "Input_Address",
         "Status",
         "Detected_Blockchain",
@@ -102,7 +102,7 @@ pub fn export_batch_to_csv(
     for (address, result) in results {
         match result {
             Ok(info) => {
-                writer.write_record(&[
+                writer.write_record([
                     address,
                     "Success",
                     &info.blockchain,
@@ -118,7 +118,7 @@ pub fn export_batch_to_csv(
                     .map(|b| b.as_str().to_string())
                     .unwrap_or_else(|| "Unknown".to_string());
 
-                writer.write_record(&[
+                writer.write_record([
                     address,
                     "Failed",
                     &blockchain,
@@ -147,7 +147,7 @@ pub fn export_matches_to_csv(
     let mut writer = Writer::from_writer(file);
 
     // Write header
-    writer.write_record(&[
+    writer.write_record([
         "Index",
         "Address",
         "Blockchain",
@@ -164,7 +164,7 @@ pub fn export_matches_to_csv(
 
     // Write data rows
     for (index, entry) in report.matches.iter().enumerate() {
-        writer.write_record(&[
+        writer.write_record([
             &(index + 1).to_string(),
             &entry.address,
             entry.blockchain.as_str(),

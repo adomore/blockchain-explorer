@@ -15,10 +15,11 @@ impl BlockchainType {
         let addr = address.trim();
 
         // Ethereum addresses: start with 0x, 40 hex characters
-        if addr.starts_with("0x") && addr.len() == 42 {
-            if addr[2..].chars().all(|c| c.is_ascii_hexdigit()) {
-                return Some(BlockchainType::Ethereum);
-            }
+        if addr.starts_with("0x")
+            && addr.len() == 42
+            && addr[2..].chars().all(|c| c.is_ascii_hexdigit())
+        {
+            return Some(BlockchainType::Ethereum);
         }
 
         // Bitcoin addresses: various formats

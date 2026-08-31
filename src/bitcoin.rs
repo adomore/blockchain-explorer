@@ -1,10 +1,13 @@
 //! Bitcoin blockchain data provider
 
-use crate::blockchain::{BlockchainError, BlockchainProvider};
+use crate::blockchain::{utils, BlockchainError, BlockchainProvider};
 use crate::models::{AddressInfo, BlockchainType, Transaction};
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::Deserialize;
+
+/// Satoshis per BTC, as a power of ten
+const BTC_DECIMALS: u8 = 8;
 
 /// Bitcoin provider using Blockstream API
 pub struct BitcoinProvider {
@@ -101,7 +104,7 @@ impl BitcoinProvider {
                             to: output.scriptpubkey_address.clone().unwrap_or_default(),
                             value: Self::sats_to_btc(output.value),
                             timestamp: Some(tx.status.block_time as i64),
-                            block_number: Some(tx.status.block_height as u64),
+                            block_number: Some(tx.status.block_height),
                             gas_used: None,
                             gas_price: None,
                             status: "Confirmed".to_string(),
@@ -119,7 +122,7 @@ impl BitcoinProvider {
                             to: address.to_string(),
                             value: Self::sats_to_btc(output.value),
                             timestamp: Some(tx.status.block_time as i64),
-                            block_number: Some(tx.status.block_height as u64),
+                            block_number: Some(tx.status.block_height),
                             gas_used: None,
                             gas_price: None,
                             status: "Confirmed".to_string(),
@@ -132,20 +135,12 @@ impl BitcoinProvider {
         Ok(transactions)
     }
 
+    /// Convert satoshis to BTC
+    ///
+    /// Shares [`utils::format_balance`] with the Ethereum provider so both
+    /// chains render balances the same way.
     fn sats_to_btc(sats: u64) -> String {
-        let btc = sats as f64 / 100_000_000.0;
-        // Remove trailing zeros for cleaner display
-        let formatted = format!("{:.8}", btc);
-        let trimmed = formatted.trim_end_matches('0').trim_end_matches('.');
-        if trimmed.is_empty() || trimmed == "0" {
-            "0".to_string()
-        } else if !trimmed.contains('.') {
-            trimmed.to_string()
-        } else if trimmed.split('.').last().unwrap().len() < 8 {
-            format!("{:.8}", btc)
-        } else {
-            trimmed.to_string()
-        }
+        utils::format_balance(&sats.to_string(), BTC_DECIMALS)
     }
 
     /// Check if address is valid Bitcoin address format
@@ -215,7 +210,6 @@ impl BlockchainProvider for BitcoinProvider {
 // API Response types
 #[derive(Debug, Deserialize)]
 struct BlockstreamAddress {
-    address: String,
     chain_stats: ChainStats,
 }
 
@@ -254,7 +248,6 @@ struct Vout {
 
 #[derive(Debug, Deserialize)]
 struct TxStatus {
-    confirmed: bool,
     #[serde(rename = "block_height")]
     block_height: u64,
     #[serde(rename = "block_time")]
@@ -270,13 +263,13 @@ pub struct MockBitcoinProvider {
 impl MockBitcoinProvider {
     pub fn new() -> Self {
         Self {
-            mock_balance: "1.50000000".to_string(),
+            mock_balance: "1.5".to_string(),
             mock_transactions: vec![
                 Transaction {
                     hash: "abc123def456".to_string(),
                     from: "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2".to_string(),
                     to: "1CounterpartyXXXXXXXXXXXXXXXUWLpVr".to_string(),
-                    value: "0.50000000".to_string(),
+                    value: "0.5".to_string(),
                     timestamp: Some(1234567890),
                     block_number: Some(123456),
                     gas_used: None,
@@ -348,9 +341,12 @@ mod tests {
 
     #[test]
     fn test_sats_to_btc() {
-        assert_eq!(BitcoinProvider::sats_to_btc(100000000), "1.00000000");
-        assert_eq!(BitcoinProvider::sats_to_btc(50000000), "0.50000000");
+        // Trailing zeros are trimmed, matching the Ethereum side
+        assert_eq!(BitcoinProvider::sats_to_btc(100_000_000), "1");
+        assert_eq!(BitcoinProvider::sats_to_btc(50_000_000), "0.5");
+        assert_eq!(BitcoinProvider::sats_to_btc(150_000_000), "1.5");
         assert_eq!(BitcoinProvider::sats_to_btc(1), "0.00000001");
+        assert_eq!(BitcoinProvider::sats_to_btc(0), "0");
     }
 
     #[tokio::test]

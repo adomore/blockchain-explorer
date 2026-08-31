@@ -226,7 +226,7 @@ mod tests {
 
     #[test]
     fn test_parse_query_command() {
-        let args = Cli::try_parse_from(&[
+        let args = Cli::try_parse_from([
             "blockchain-explorer",
             "query",
             "0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21",
@@ -247,7 +247,7 @@ mod tests {
 
     #[test]
     fn test_parse_batch_command() {
-        let args = Cli::try_parse_from(&[
+        let args = Cli::try_parse_from([
             "blockchain-explorer",
             "batch",
             "addresses.txt",
@@ -267,7 +267,7 @@ mod tests {
 
     #[test]
     fn test_parse_match_command() {
-        let args = Cli::try_parse_from(&[
+        let args = Cli::try_parse_from([
             "blockchain-explorer",
             "match",
             "notes.txt",
@@ -291,7 +291,7 @@ mod tests {
 
     #[test]
     fn test_match_command_defaults() {
-        let args = Cli::try_parse_from(&["blockchain-explorer", "match", "notes.txt"]).unwrap();
+        let args = Cli::try_parse_from(["blockchain-explorer", "match", "notes.txt"]).unwrap();
 
         match args.command {
             Commands::Match(matched) => {
@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn test_parse_detect_command() {
         let args =
-            Cli::try_parse_from(&["blockchain-explorer", "detect", "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"])
+            Cli::try_parse_from(["blockchain-explorer", "detect", "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"])
                 .unwrap();
 
         match args.command {

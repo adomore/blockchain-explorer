@@ -5,7 +5,7 @@
 //! - Requires chainid parameter (1 for Ethereum mainnet)
 //! - API key can be set via ETHERSCAN_API_KEY environment variable
 
-use crate::blockchain::{BlockchainError, BlockchainProvider};
+use crate::blockchain::{utils, BlockchainError, BlockchainProvider};
 use crate::models::{AddressInfo, BlockchainType, Transaction};
 use async_trait::async_trait;
 use reqwest::Client;
@@ -13,6 +13,9 @@ use serde::Deserialize;
 
 /// Ethereum chain ID for Etherscan API V2
 const ETH_CHAIN_ID: &str = "1";
+
+/// Wei per ETH, as a power of ten
+const ETH_DECIMALS: u8 = 18;
 
 /// Default API key placeholder (rate limited)
 const DEFAULT_API_KEY: &str = "YourApiKeyToken";
@@ -153,22 +156,11 @@ impl EthereumProvider {
     }
 
     /// Convert wei to ETH
+    ///
+    /// Division happens in `u128`, so no wei is lost. Going through `f64` would
+    /// silently round: an `f64` mantissa holds 53 bits, and 1 ETH is 10^18 wei.
     fn wei_to_eth(wei: &str) -> String {
-        if let Ok(value) = wei.parse::<u128>() {
-            let eth = value as f64 / 1_000_000_000_000_000_000.0;
-            // Format: remove trailing zeros, keep at least 8 decimal places for precision
-            let formatted = format!("{:.18}", eth);
-            // Remove trailing zeros after decimal point
-            let trimmed = formatted.trim_end_matches('0').trim_end_matches('.');
-            // If we removed too much precision, add back some zeros
-            if trimmed.contains('.') && trimmed.split('.').last().unwrap().len() < 8 {
-                format!("{:.8}", eth)
-            } else {
-                trimmed.to_string()
-            }
-        } else {
-            wei.to_string()
-        }
+        utils::format_balance(wei, ETH_DECIMALS)
     }
 }
 

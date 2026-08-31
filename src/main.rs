@@ -331,7 +331,7 @@ async fn main() {
         Level::INFO
     };
 
-    let _subscriber = FmtSubscriber::builder()
+    FmtSubscriber::builder()
         .with_max_level(log_level)
         .with_target(false)
         .init();
