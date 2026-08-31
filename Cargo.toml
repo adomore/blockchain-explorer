@@ -1,6 +1,6 @@
 [package]
 name = "blockchain_explorer"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 authors = ["Blockchain Explorer Team"]
 description = "A command-line tool for retrieving blockchain data (ETH, BTC) - Updated for Etherscan API V2"
