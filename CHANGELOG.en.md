@@ -12,6 +12,13 @@ declared 0.3.0. 0.1.0 and 0.2.0 predate any recorded history here: there are no
 tags and no earlier commits, so they are left undated rather than given a
 made-up date.
 
+## [Unreleased]
+
+### Added
+- Release workflow: pushing a `v*` tag builds binaries for every target and
+  attaches them to the release (Linux glibc / musl / aarch64, macOS Intel and
+  Apple Silicon, Windows x86_64 and ARM64), together with a `SHA256SUMS` file
+
 ## [0.4.1] - 2026-08-31
 
 ### Fixed

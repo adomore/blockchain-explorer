@@ -22,6 +22,13 @@ AIGC:
 0.1.0 与 0.2.0 早于这里的任何记录：仓库既没有 tag 也没有更早的提交，因此宁可
 不标日期，也不填一个编造出来的日期。
 
+## [未发布]
+
+### 新增
+- Release 工作流：推送 `v*` tag 时为各目标平台构建二进制包并附到 Release
+  上（Linux 的 glibc / musl / aarch64、macOS 的 Intel 与 Apple Silicon、
+  Windows 的 x86_64 与 ARM64），同时附带 `SHA256SUMS` 校验文件
+
 ## [0.4.1] - 2026-08-31
 
 ### 修复

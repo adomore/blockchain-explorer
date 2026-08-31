@@ -18,6 +18,32 @@
 
 ## 安装
 
+### 下载预编译二进制
+
+只想用的话不必安装 Rust 工具链。[Releases 页面](https://github.com/adomore/blockchain-explorer/releases/latest)为每个平台提供了预编译压缩包：
+
+| 平台 | 文件 |
+|------|------|
+| Linux x86_64（glibc） | `blockchain-explorer-<版本>-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux x86_64（静态链接，musl） | `blockchain-explorer-<版本>-x86_64-unknown-linux-musl.tar.gz` |
+| Linux aarch64 | `blockchain-explorer-<版本>-aarch64-unknown-linux-gnu.tar.gz` |
+| macOS Apple Silicon | `blockchain-explorer-<版本>-aarch64-apple-darwin.tar.gz` |
+| macOS Intel | `blockchain-explorer-<版本>-x86_64-apple-darwin.tar.gz` |
+| Windows x86_64 | `blockchain-explorer-<版本>-x86_64-pc-windows-msvc.zip` |
+| Windows ARM64 | `blockchain-explorer-<版本>-aarch64-pc-windows-msvc.zip` |
+
+每个压缩包内含可执行文件、两份 README、两份变更日志与许可证。musl 版本是静态链接的，因此可以在比构建机更老的发行版上运行。
+
+校验并解压：
+
+```bash
+# 校验完整性（SHA256SUMS 与压缩包一同放在 Release 页面）
+sha256sum -c SHA256SUMS --ignore-missing
+
+tar -xzf blockchain-explorer-*-x86_64-unknown-linux-gnu.tar.gz
+./blockchain-explorer-*/blockchain-explorer --help
+```
+
 ### 前置要求
 
 - **Rust 工具链** 1.86 或更高（stable）- 支持 Windows 11, macOS, Linux
@@ -374,7 +400,8 @@ blockchain-explorer/
 ├── LICENSE               # MIT
 ├── .github/
 │   └── workflows/
-│       └── ci.yml        # 三平台测试 + fmt/clippy + MSRV + lockstep 校验
+│       ├── ci.yml        # 三平台测试 + fmt/clippy + MSRV + lockstep 校验
+│       └── release.yml   # 打 tag 时构建各平台二进制包
 ├── scripts/
 │   └── check_lockstep.py # EN/ZH 文档结构一致性闸门
 ├── src/

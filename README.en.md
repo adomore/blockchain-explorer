@@ -18,6 +18,32 @@
 
 ## Installation
 
+### Downloading a prebuilt binary
+
+If you only want to run it, you do not need a Rust toolchain. The [Releases page](https://github.com/adomore/blockchain-explorer/releases/latest) carries a prebuilt archive for each platform:
+
+| Platform | File |
+|----------|------|
+| Linux x86_64 (glibc) | `blockchain-explorer-<version>-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux x86_64 (static, musl) | `blockchain-explorer-<version>-x86_64-unknown-linux-musl.tar.gz` |
+| Linux aarch64 | `blockchain-explorer-<version>-aarch64-unknown-linux-gnu.tar.gz` |
+| macOS Apple Silicon | `blockchain-explorer-<version>-aarch64-apple-darwin.tar.gz` |
+| macOS Intel | `blockchain-explorer-<version>-x86_64-apple-darwin.tar.gz` |
+| Windows x86_64 | `blockchain-explorer-<version>-x86_64-pc-windows-msvc.zip` |
+| Windows ARM64 | `blockchain-explorer-<version>-aarch64-pc-windows-msvc.zip` |
+
+Each archive holds the executable, both READMEs, both changelogs and the licence. The musl build is statically linked, so it runs on distributions older than the machine that produced it.
+
+Verify and unpack:
+
+```bash
+# Check integrity (SHA256SUMS sits beside the archives on the Release page)
+sha256sum -c SHA256SUMS --ignore-missing
+
+tar -xzf blockchain-explorer-*-x86_64-unknown-linux-gnu.tar.gz
+./blockchain-explorer-*/blockchain-explorer --help
+```
+
 ### Prerequisites
 
 - **Rust toolchain** 1.86 or newer (stable) - supports Windows 11, macOS, Linux
@@ -374,7 +400,8 @@ blockchain-explorer/
 ├── LICENSE               # MIT
 ├── .github/
 │   └── workflows/
-│       └── ci.yml        # tests on three platforms + fmt/clippy + MSRV + lockstep
+│       ├── ci.yml        # tests on three platforms + fmt/clippy + MSRV + lockstep
+│       └── release.yml   # builds binaries for every target on tag push
 ├── scripts/
 │   └── check_lockstep.py # EN/ZH documentation structure gate
 ├── src/
