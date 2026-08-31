@@ -50,7 +50,7 @@ jobs:
             os: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag || github.ref }}
 
@@ -107,7 +107,7 @@ jobs:
             echo "ASSET=dist/$NAME.tar.gz" >> "$GITHUB_ENV"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.target }}
           path: ${{ env.ASSET }}
@@ -118,10 +118,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.tag || github.ref }}
 
+      # Still on v4 deliberately: every published major of download-artifact
+      # runs on Node 20, so bumping would not clear the deprecation warning.
       - uses: actions/download-artifact@v4
         with:
           path: dist

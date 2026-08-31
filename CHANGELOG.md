@@ -29,6 +29,10 @@ AIGC:
   上（Linux 的 glibc / musl / aarch64、macOS 的 Intel 与 Apple Silicon、
   Windows 的 x86_64 与 ARM64），同时附带 `SHA256SUMS` 校验文件
 
+### 变更
+- 工作流中的 action 升级到运行于 Node 24 的大版本，消除 Node 20 弃用警告。
+  `download-artifact` 仍留在 v4：它至今没有任何跑 Node 24 的版本
+
 ## [0.4.1] - 2026-08-31
 
 ### 修复

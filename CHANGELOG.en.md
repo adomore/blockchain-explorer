@@ -19,6 +19,11 @@ made-up date.
   attaches them to the release (Linux glibc / musl / aarch64, macOS Intel and
   Apple Silicon, Windows x86_64 and ARM64), together with a `SHA256SUMS` file
 
+### Changed
+- Workflow actions moved to majors that run on Node 24, clearing the Node 20
+  deprecation warnings. `download-artifact` stays on v4: no published major of
+  it runs on Node 24 yet
+
 ## [0.4.1] - 2026-08-31
 
 ### Fixed
