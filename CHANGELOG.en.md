@@ -12,7 +12,7 @@ declared 0.3.0. 0.1.0 and 0.2.0 predate any recorded history here: there are no
 tags and no earlier commits, so they are left undated rather than given a
 made-up date.
 
-## [Unreleased]
+## [0.4.0] - 2026-08-31
 
 ### Added
 - `match` command: scan any text file for BTC/ETH addresses and write the
